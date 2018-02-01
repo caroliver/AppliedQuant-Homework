@@ -1,0 +1,130 @@
+---
+title: "Univariate Assignment"
+author: "Caroline Oliver"
+date: "1/30/2018"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+treeData = read.csv(file = "http://dmcglinn.github.io/quant_methods/data/treedata_subset.csv", header = TRUE)
+
+redMapleData = subset(treeData, species == "Acer rubrum")
+frasierFirData = subset(treeData, species == "Abies fraseri")
+```
+## Data Plots
+### Pairs Plot for Red Maple Data
+```{r}
+redSample <- sample(1:723, 44, replace=F)
+pairs(redMapleData[redSample,4:9], pch = 19, col = c("red", "green3", "blue", "yellow", "orange"), upper.panel = NULL)
+```
+### Pairs Plot for Fraiser Fir Data
+```{r}
+pairs(frasierFirData[ ,4:9], pch = 19, col = c("red", "green3", "blue", "yellow", "orange"), upper.panel = NULL)
+```
+### OLS Summary for Red Maple Data
+```{r}
+redMapleOLS = lm(cover~elev + tci + streamdist + disturb + beers, data = redMapleData)
+summary(redMapleOLS)
+```
+### OLS Summary for Fraiser Fir Data
+```{r}
+frasierFirOLS = lm(cover~elev + tci + streamdist + disturb + beers, data = frasierFirData)
+summary(frasierFirOLS)
+```
+
+## Anova Summaires for all 3 Datasets
+### Red Maple Anova
+```{r}
+anova(redMapleOLS)
+```
+### Frasier Fir Anova
+```{r}
+anova(frasierFirOLS)
+```
+## Linear Model Plots
+### Red Maple Plots
+```{r}
+par(mfrow=c(2,2))
+plot(redMapleOLS)
+```
+
+### Frasier Fir Plots
+```{r}
+par(mfrow=c(2,2))
+plot(frasierFirOLS)
+```
+
+## Questions Set 1
+### How well does the exploratory model appear to explain cover?
+
+#### To decide how welll the models explained cover we can look at the R squared values, F-statistic, and p-value. For the Red Maple Model the R squared values were much lower than that of the Frasier Fir Model which would seem to mean that the variance was better explained in the Red Maple Model than in the Frasier Fir Model. If you look at the F-statistics and p-values for the two models, the Frasier Fir Model had a better F-statistic at 7.171 over the Red Maple Model with an F-statistic value of 4.801. Similarly, the Frasier Fir Model had a better p-value score as well. However, it is necessary to note the difference in sample size between the two datasets. The Red Maple Model is modeled off of 723 values, where as the Frasier Fir Model is only modeled off of 44. Smaller models tend to require larger F-statistics than the larger models if the result is significant (i.e. there is a correlation between the preditor variables and the variable they are predicting) simply due to the smaller sample size. In the case of the Red Maple Model and the Frasier Fir Model, both seemed to do a relatively good job at explaining cover.
+
+### Which explanatory variables are the most important?
+
+#### For the Red Maple Tree Data, the elevation stream distribution, and beers varaibles appear to be most important according to the anova performed on the Red Maple OLS model. All three variables had a significance code of 0.01. For the Frasier Fir Tree Data, elevation seems to be a very important varaible with a significance code of 0. The tci variable comes in as second most important with a significance code of 0.1 which is not typically seen as statisically significant.
+
+### Do model diagnostics indicate any problems with violations of OLS assumptions?
+
+#### For both the Red Maple Tree Model and the Frasier Fir Tree Model, the linear model plots seem to conclude that the data does not violate the OLS assumptions of linearity which can be seen in the residuals vs fitted plot in the upper left hand corner, or mulitvariate normality which can be seen in the Normal Q-Q plot in the upper right hand corner. There is also little multicolinearity which can be seen in the original pairs plots for both the Red Maple and the Frasier Fir Datasets.
+
+### Are you able to explain variance in one species better than another, why might this be the case?
+
+#### For variance we look at the adjusted R squared variable which for the Red Maple Data OLS is 0.03558 and for the Frasier Fir Data is 0.5011. This vast difference in adjusted R squared values can possibly be explained by the difference in sample size between the two datasets. The Red Maple Dataset has 723 values in it, while the Frasier Fir Dataset only has 44 values.
+
+## GLM Models for the 2 Datasets
+### Red Maple GLM
+```{r}
+redMaple_glm = glm(cover~elev + tci + streamdist + disturb + beers, data= redMapleData, family='poisson')
+summary(redMaple_glm)
+```
+
+### Fraiser Fir GLM
+```{r}
+frasierFir_glm = glm(cover~elev + tci + streamdist + disturb + beers, data= frasierFirData, family='poisson')
+summary(frasierFir_glm)
+```
+
+## Pseudo R Squared values for each GLM Model
+```{r}
+ pseudo_r2 = function(glm_mod) {
+     1 -  glm_mod$deviance / glm_mod$null.deviance
+ }
+```
+
+### Red Maple R Squared Value
+```{r}
+pseudo_r2(redMaple_glm)
+```
+
+### Fraiser Fir R Squared Value
+```{r}
+pseudo_r2(frasierFir_glm)
+```
+
+## Anova Comparing Models
+### Anova Comparing Red Maple Models
+```{r}
+anova(redMapleOLS, redMaple_glm)
+```
+
+### Anova Comparing Fraiser Fir Models
+```{r}
+anova(frasierFirOLS, frasierFir_glm)
+```
+
+## Question Set 2
+### Does it appear that changing the error distribution changed the results much? In what ways?
+
+#### Even though the Poisson GLM Model is more sophisticated, the results from the OLS Models and the GLM Models do not significantly differ. Even though the OLS Model is more robust, the significant vairables for both the Red Maple OLS Model and the Frasier Fir OLS Model are generally consistent with the significant varaibles for the Red Maple and Frasier Fir GLM Models with Poisson Distribution.
+
+## Question 3: Sumary & Conclusions
+
+#### Similarly to what was said in Question Sets 1 & 2, the OLS Models for both the Red Maple Tree Data and the Frasier Fir Tree Data performed well given the size of the datasets. Even though the F-statistics and P-values differ between the two models and may appear to be better for one model than the other, both can be considered significant. Since the Frasier Fir Dataset only consisted of 44 data points, a larger F-statistic and smaller P-value, compared to the Red Maple Dataset, are needed to prove a significant relationship between the predictor variables and cover. On the other hand, the Red Maple Dataset represents a much larger sample size at 723 data points, so a slightly smaller F-statistic and P-value are still seen as significant and the model is deemed useful. Also to note, the more sophisticated GLM model with Poisson error distribution did not seem to provide any great difference in variable significance compared to the OLS Models for each of the datasets.
+
+
