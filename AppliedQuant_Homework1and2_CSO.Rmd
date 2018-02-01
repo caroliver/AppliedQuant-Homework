@@ -1,5 +1,5 @@
 ---
-title: "Applied Quantitative Methods Assignment 1"
+title: "Applied Quantitative Methods Assignment 1 and 2"
 author: "Caroline Oliver"
 output:
   html_document: default
