@@ -1,0 +1,80 @@
+---
+title: "Homework 4: Multivariate Models"
+author: "Caroline Oliver"
+date: "2/13/2018"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(vegan)
+data(dune)
+data(dune.env)
+?dune
+```
+
+# Question 1
+
+```{r}
+dune_mds = metaMDS(dune, distance = "bray")
+
+plot(dune_mds, type='n')
+text(dune_mds, 'sp', cex=.5)
+# generate vector of colors 
+color_vect = rev(terrain.colors(6))[-1]
+points(dune_mds, 'sites', pch=19, col=color_vect[dune.env$Moisture])
+legend('topright', paste("Moisture =", 1:5, sep=''), col=color_vect, pch=19)
+```
+
+
+## Describe how you interpret the graphic
+### The graph represents the various moisture levels and the plants that rank near each of the various moisture levels. If a plant species is near a moisture marker or if a group of species is located within or near a group of similar/same moisture markers than it is logical to assume that those specie(s) require that level of moisture to survive in the dunes.
+
+## What is the goal of creating such a plot?
+### The MDS plot helps to visualize the distribution of the moisture and which species the different moisture values correlate to. This helps us to know what the best growing conditions are for a certain species and which species possibly will work well together in the same space/grow together in nature.
+
+## Does this analysis suggest any interesting findings with respect to the dune vegetation?
+### The plot shows mostly clumps or groups of species near various moisture measures, however, 3 species (Airaprae, Empenigr, and Hyporadi) are located at the top, center of the plot not near any moisture level markers. Salirepe also has a greater distance between the species marker and a moisture marker. These 4 species have the most distance between species markers and moisture markers, while most other species are in closer proximity to a moisture marker. This could mean that these plants require little to no moisture compared to the other species in the dataset. 
+ 
+ 
+# Question 2 
+#### Set Up
+```{r}
+dune.env$Moisture = as.numeric(dune.env$Moisture)
+dune.env$Manure = as.numeric(dune.env$Manure)
+
+# SF = 1, BF = 2, HF = 3, NM = 4
+dune.env$Management = as.numeric(factor(dune.env$Management , levels=c("SF", "BF", "HF", "NM")))
+
+# Haypastu = 1, Hayfield = 2, Pasture = 3
+dune.env$Use = as.numeric(factor(dune.env$Use , levels=c("Haypastu", "Hayfield", "Pasture")))
+``` 
+
+```{r}
+dune_cca = cca(dune, dune.env)
+dune_cca
+
+plot(dune_cca)
+```
+
+```{r}
+dune_cca2 = cca(dune ~ Moisture, dune.env)
+dune_cca2
+
+plot(dune_cca2)
+```
+
+### For the second model that I did I only used Moisture as a predictor so that I could compare it better to the graph in the first question. To note, similar species that were farther away from the moisture markers in the first plot are stand out species in this plot as well, along with another, Anthodor.
+
+
+# Question 3
+## Do your two analyses agree with one another or complement one another or do these two analyses seem to be suggesting different take home messages? 
+### For the initial model in Question 2 where all predictors are used, it shows that (obviously) moisture is not the only thing that effects the various species nor is it the most prominent deciding variable. The 3 species that seemed to be farthest away from the moisture markers in the first graph are more integrated with the species markers in this graph most likely because the other variables were used. However, like I stated above in question 2, the cca model only using moisture as a predictor has a very similar interpretation as the graph from question 1.
+
+## Which analysis do you find to be more useful?
+### Personally I found the NMDS model more useful. It has a clearner looking graph and handles more varaition than the CCA model.
